@@ -1,0 +1,5 @@
+# Ignore arquivos compilados
+bot
+
+#Ignora pasta .vscode
+.vscode
