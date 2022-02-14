@@ -10,6 +10,7 @@ typedef struct
   char id[11]; // Cada identificador só pode ter no máximo 10 caracteres
   int x;
   int y;
+  int currentLoad; //Carga atual
 }Player;
 
 typedef struct
@@ -17,6 +18,11 @@ typedef struct
   int data;
   int hasBoat;
 }Cell;
+
+// Função de Módulo
+int module(int x){
+  return (x>=0)?x:-1*x;
+}
 
 // Leitura dos dados do turno
 void readData(int h, int w,Cell** map,Player* player) { 
@@ -45,8 +51,106 @@ void readData(int h, int w,Cell** map,Player* player) {
   }
 }
 
+// Calcular distância
+int getDistance(int x, int y, Player* Player){
+  return (module(Player->x - x) + module(Player->y - y));
+}
+
+// Verificar porto mais próximo
+void checkNearestHarbor(int h, int w, Cell** map, Player* player, int* xHarbor, int* yHarbor){
+  int distance = h+w;
+  int currentDistance = distance;
+  int *xHarbor = -1;
+  int *yHarbor = -1;
+
+  for(int y=0; y<h;y++){
+    for(int x=0;x<w;x++){
+      if(map[y][x].data==1){// Se tem um porto naquela posição
+        currentDistance = getDistance(x, y, player);
+        if(currentDistance<distance){
+          distance = currentDistance;
+          *xHarbor = x;
+          *yHarbor = y;
+        }
+      }
+    }
+  }
+
+}
+
+// Se locomover para alguma direção (L: left, R: Right, U: Up, D: Down)
+void move(char direction){
+
+  switch (direction){
+    case 'U':case 'u': printf("UP\n");break; // Se move pra cima
+    case 'D': case 'd': printf('DOWN\n');break; // Se move pra baixo
+    case 'L': case 'l': printf('LEFT\n');break; // Se move para a esquerda
+    case 'R': case 'r': printf('RIGHT\n');break; // Se move para a direita
+    default: printf("PASS\n"); // Passar a vez
+
+  }
+
+}
+
+// Se mover para o porto mais próximo
+void moveToPort(int h, int w, Cell** map, int xHarbor, int yHarbor, Player* player){
+  char response[MAX_STR] = {0}; // Linha para receber a resposta da ação executada
+
+  char horizontalMove = (player->x < xHarbor)?'R':'L'; // R (Right) e L (Left)
+  char verticalMove = (player->y < yHarbor)?'U':'D'; // U (Up) e D (Down)
+  
+  int moveIncrement = (player->x < xHarbor)?1:-1; // Variável para verificar se tem bots na célula em que se planeja ir
+
+  int isFirstMove = 1;
+
+  int horizontalMoves = module(player->x - xHarbor); // Quantidade de movimentos horizontais restantes para chegar ao porto
+  int verticalMoves = module(player->y - yHarbor); // Quantidade de movimentos verticais restantes para chegar ao porto
+
+  // Vai realizando as movimentações horizontais para chegar ao portos
+  while(horizontalMoves>0){
+    if(!isFirstMove){
+      readData(h, w, map, player);
+    }
+
+    if(map[player->y][player->x+moveIncrement].hasBoat && verticalMoves>0){ // Se a área está ocupada e ainda restam movimentos verticais
+      move(verticalMove);
+      scanf("%s", response); // Obtém resposta
+
+      if(strcmp(response,"DONE")==0){ // Se a resposta foi DONE (Sucesso)
+        verticalMoves-=1;
+      }
+    }
+
+    move(horizontalMove);
+    scanf("%s", response); // Obtém resposta
+
+    if(strcmp(response, "DONE")==0){
+      horizontalMoves-=1;
+    }
+
+    isFirstMove = 0;
+  }
+
+  // Vai realizando as movimentações verticais restantes
+  while(verticalMoves>0){
+    if(!isFirstMove){
+      readData(h, w, map, player);
+    }
+
+    move(verticalMove);
+    scanf("%s", response); // Obtém resposta
+
+    if(strcmp(response, "DONE")==0){
+      verticalMoves-=1;
+    }    
+
+    isFirstMove = 0;
+  }
+
+}
+
 int main() {
-  char line[MAX_STR];   // dados temporários
+  char response[MAX_STR];   // dados temporários
   char myId[MAX_STR] = {0};   // identificador do bot em questão (Inicializando vazio para eliminar eventuais lixos de memória)
   Player player = {0}; // Inicializa o registro do player principal com os dados vazios
 
@@ -92,7 +196,7 @@ int main() {
     printf("LEFT\n");
 
     // lê qual foi o resultado da ação (e eventualmente atualiza os dados do bot).
-    scanf("%s", line);
+    scanf("%s", response);
   }
 
   return 0;
