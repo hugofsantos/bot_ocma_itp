@@ -1,5 +1,6 @@
 # Ignore arquivos compilados
 bot
+*.exe
 
 #Ignora pasta .vscode
 .vscode
