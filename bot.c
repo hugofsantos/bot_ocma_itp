@@ -70,7 +70,7 @@ void checkNearestHarbor(int h, int w, Cell** map, Player* player, int* xHarbor, 
     for(int x=0;x<w;x++){
       if(map[y][x].data==1){// Se tem um porto naquela posição
         currentDistance = getDistance(x, y, player);
-        if(currentDistance<distance){
+        if(currentDistance < distance){
           distance = currentDistance;
           *xHarbor = x;
           *yHarbor = y;
@@ -96,7 +96,7 @@ void move(char direction){
 }
 
 // Se mover para o porto mais próximo
-void moveToPort(int h, int w, Cell** map, int xHarbor, int yHarbor, Player* player){
+void moveToHarbor(int h, int w, Cell** map, int xHarbor, int yHarbor, Player* player){
   char response[MAX_STR] = {0}; // Linha para receber a resposta da ação executada
 
   char horizontalMove = (player->x < xHarbor)?'R':'L'; // R (Right) e L (Left)
@@ -121,6 +121,9 @@ void moveToPort(int h, int w, Cell** map, int xHarbor, int yHarbor, Player* play
 
       if(strcmp(response,"DONE")==0){ // Se a resposta foi DONE (Sucesso)
         verticalMoves-=1;
+
+        isFirstMove = 0;
+        continue;
       }
     }
 
@@ -200,7 +203,7 @@ int getCellProfitability(int xIntent, int yIntent, int h, int w, Cell** map){
   numberOfFish = cell.data%10;
   kindOfFish = (int) (cell.data/10);
 
-  return fishValues[kindOfFish-1] * (numberOfFish-1);
+  return fishValues[kindOfFish-1] * (numberOfFish-1); // Não podemos pescar o último peixe de uma determinada área
 }
 
 int main() {
