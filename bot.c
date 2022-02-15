@@ -200,7 +200,7 @@ int getCellProfitability(int xIntent, int yIntent, int h, int w, Cell** map){
   numberOfFish = cell.data%10;
   kindOfFish = (int) (cell.data/10);
 
-  return fishValues[kindOfFish-1] * numberOfFish;
+  return fishValues[kindOfFish-1] * (numberOfFish-1);
 }
 
 int main() {
