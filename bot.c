@@ -4,7 +4,7 @@
 
 #define MAX_STR 50
 
-// Definição de registros
+// ---------------------------------------- Definição de registros -----------------------------------
 typedef struct
 {
   char id[11]; // Cada identificador só pode ter no máximo 10 caracteres
@@ -23,6 +23,7 @@ typedef struct
 int module(int x){
   return (x>=0)?x:-1*x;
 }
+// -----------------------------------------------------------------------------------------------------
 
 // Leitura dos dados do turno
 void readData(int h, int w,Cell** map,Player* player) { 
@@ -50,6 +51,8 @@ void readData(int h, int w,Cell** map,Player* player) {
     (map[x][y]).hasBoat = 1; // Indica que a posição xy da matriz tem um bote
   }
 }
+
+// ------------------------------------- Funções relacionadas ao porto ---------------------------------
 
 // Calcular distância
 int getDistance(int x, int y, Player* Player){
@@ -147,6 +150,57 @@ void moveToPort(int h, int w, Cell** map, int xHarbor, int yHarbor, Player* play
     isFirstMove = 0;
   }
 
+}
+// --------------------------------------- Funções para lógica de locomoção geral do barco -------------------------------
+
+// Ver lucratividade de algum movimento em específico
+int getMoveProfitability(char direction, int h, int w, Cell** map, Player* player){
+  int xIntent = player->x;
+  int yIntent =player->y;
+
+  switch(direction){
+    case 'U':case 'u': // Up
+      yIntent+=1;
+      break;
+    case 'D':case 'd': // Down
+      yIntent-=1;
+      break;
+    case 'L':case 'l': // Left
+      xIntent-=1;
+      break;
+    case 'R':case 'r': // Right
+      xIntent+=1;
+  }
+
+  return getCellProfitability(xIntent, yIntent, h, w, map);
+}
+// Ver lucratividade de uma célula em específico
+int getCellProfitability(int xIntent, int yIntent, int h, int w, Cell** map){
+  Cell cell = {0};
+
+  int numberOfFish = 0;
+  int kindOfFish = 0;
+
+  int fishValues[3] = {100, 150, 200}; // Preço da Tainha, Cioba e Robalo respectivamente (No contexto do jogo)
+  int isOutMap = (xIntent < 0 || xIntent > w) || (yIntent < 0 || yIntent > h); // Se a cordenada está fora dos limites do mapa
+
+  if(isOutMap){
+    return -500; // Valor da multa por exceder o mapa
+  }
+
+  cell = map[yIntent][xIntent];
+
+  if(cell.hasBoat){ // Se tem um outro bot no local
+    return -1;
+  }
+  if(cell.data==1 && cell.data==0){// Se tem um porto ou não tem nada
+    return 0;
+  }
+
+  numberOfFish = cell.data%10;
+  kindOfFish = (int) (cell.data/10);
+
+  return fishValues[kindOfFish-1] * numberOfFish;
 }
 
 int main() {
