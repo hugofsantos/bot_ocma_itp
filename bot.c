@@ -26,7 +26,7 @@ int module(int x){
 // -----------------------------------------------------------------------------------------------------
 
 // Leitura dos dados do turno
-void readData(int h, int w,Cell** map,Player* player) { 
+void readData(int h, int w, Cell** map, Player* player) { 
   char id[MAX_STR];
   int numberOfBots;
   int x, y;
@@ -100,7 +100,7 @@ void moveToHarbor(int h, int w, Cell** map, int xHarbor, int yHarbor, Player* pl
   char response[MAX_STR] = {0}; // Linha para receber a resposta da ação executada
 
   char horizontalMove = (player->x < xHarbor)?'R':'L'; // R (Right) e L (Left)
-  char verticalMove = (player->y < yHarbor)?'U':'D'; // U (Up) e D (Down)
+  char verticalMove = (player->y < yHarbor)?'D':'U'; // U (Up) e D (Down)
   
   int moveIncrement = (player->x < xHarbor)?1:-1; // Variável para verificar se tem bots na célula em que se planeja ir
 
@@ -163,10 +163,10 @@ int getMoveProfitability(char direction, int h, int w, Cell** map, Player* playe
 
   switch(direction){
     case 'U':case 'u': // Up
-      yIntent+=1;
+      yIntent-=1;
       break;
     case 'D':case 'd': // Down
-      yIntent-=1;
+      yIntent+=1;
       break;
     case 'L':case 'l': // Left
       xIntent-=1;
